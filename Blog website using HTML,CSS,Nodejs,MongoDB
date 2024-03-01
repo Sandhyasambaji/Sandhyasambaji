@@ -1,0 +1,94 @@
+//html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Website</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>My Blog</h1>
+    </header>
+    <div class="container">
+        <!-- Blog posts will be dynamically inserted here -->
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+//css
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.post {
+    border-bottom: 1px solid #ccc;
+    padding: 20px 0;
+}
+
+.post h2 {
+    margin-top: 0;
+}
+
+.post p {
+    margin-bottom: 0;
+}
+//nodejs,mongoDB
+npm install express mongoose body-parser
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const app = express();
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost/blog', { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('Could not connect to MongoDB', err));
+
+// Create mongoose schema for blog posts
+const postSchema = new mongoose.Schema({
+    title: String,
+    content: String,
+});
+
+const Post = mongoose.model('Post', postSchema);
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Routes
+app.get('/api/posts', async (req, res) => {
+    const posts = await Post.find();
+    res.send(posts);
+});
+
+app.post('/api/posts', async (req, res) => {
+    const post = new Post({
+        title: req.body.title,
+        content: req.body.content,
+    });
+    await post.save();
+    res.send(post);
+});
+
+// Start server
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(Server listening on port ${port}));
